@@ -76,7 +76,7 @@ h2, h3 {
     position: absolute;
     left: 2rem;
     top: 50%;
-    width: 132px;
+    width: 170px;
     height: auto;
     transform: translateY(-50%);
 }
@@ -99,7 +99,7 @@ h2, h3 {
 
     .app-navbar img {
         left: 1rem;
-        width: 104px;
+        width: 128px;
     }
 
     .app-title {
