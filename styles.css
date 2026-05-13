@@ -36,6 +36,17 @@ footer {
     display: none !important;
 }
 
+/* Hide remaining Streamlit floating/status widgets and branding badges. */
+div[data-testid="stStatusWidget"],
+div[data-testid="stAppViewToolbar"],
+div[data-testid="stSidebarNav"],
+a[href*="streamlit.io"],
+a[title*="Streamlit"],
+a[aria-label*="Streamlit"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
 .block-container {
     max-width: 100%;
     padding-left: 0;
