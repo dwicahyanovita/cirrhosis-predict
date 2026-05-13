@@ -23,11 +23,17 @@
 }
 
 header[data-testid="stHeader"] {
-    background: #ffffff;
+    display: none !important;
 }
 
 div[data-testid="stDecoration"] {
     display: none;
+}
+
+div[data-testid="stToolbar"],
+#MainMenu,
+footer {
+    display: none !important;
 }
 
 .block-container {
@@ -208,6 +214,14 @@ div[data-testid="stFormSubmitButton"] > button {
     font-weight: 700;
     padding: 0.6rem 1.25rem;
     box-shadow: 0 8px 18px rgba(127, 29, 29, 0.18);
+}
+
+div[data-testid="stFormSubmitButton"] > button,
+div[data-testid="stFormSubmitButton"] > button *,
+.stButton > button,
+.stButton > button * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 div[data-testid="stFormSubmitButton"] > button:hover {
