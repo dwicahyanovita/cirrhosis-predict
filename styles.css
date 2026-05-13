@@ -61,13 +61,13 @@ h2, h3 {
     align-items: center;
     justify-content: center;
     min-height: 88px;
-    width: 100%;
+    width: 100vw;
     margin: 0 0 1.5rem 0;
     padding: 0.2rem 11.5rem;
-    background: #b91c1c;
-    border: 1px solid #991b1b;
+    background: #7f1d1d;
+    border: 1px solid #6b1414;
     border-radius: 0;
-    box-shadow: 0 14px 30px rgba(127, 29, 29, 0.22);
+    box-shadow: 0 14px 30px rgba(95, 21, 21, 0.24);
 }
 
 .app-navbar img {
@@ -203,7 +203,7 @@ button[data-testid="stNumberInputStepDown"]:hover {
 
 div[data-testid="stFormSubmitButton"] {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 div[data-testid="stFormSubmitButton"] > button {
