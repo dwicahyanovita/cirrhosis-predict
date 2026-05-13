@@ -12,6 +12,16 @@
     color: var(--text-main);
 }
 
+/* Force readable foreground/background in all themes (including Chrome rendering quirks). */
+.stApp,
+.stApp p,
+.stApp span,
+.stApp label,
+.stApp li,
+.stApp div {
+    color: var(--text-main);
+}
+
 header[data-testid="stHeader"] {
     background: #ffffff;
 }
@@ -117,8 +127,8 @@ div[data-testid="stWidgetLabel"] span {
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div {
     min-height: 38px;
-    border-color: var(--border-soft);
-    background: #ffffff;
+    border-color: var(--border-soft) !important;
+    background: #ffffff !important;
 }
 
 div[data-baseweb="input"] input {
@@ -136,6 +146,24 @@ div[data-baseweb="select"] span {
     font-size: 0.95rem;
     color: var(--text-main) !important;
     opacity: 1 !important;
+}
+
+div[data-baseweb="select"] svg {
+    color: var(--text-main) !important;
+    fill: var(--text-main) !important;
+}
+
+/* Number input +/- controls */
+button[data-testid="stNumberInputStepUp"],
+button[data-testid="stNumberInputStepDown"] {
+    background: #ffffff !important;
+    color: var(--text-main) !important;
+    border-left: 1px solid var(--border-soft) !important;
+}
+
+button[data-testid="stNumberInputStepUp"]:hover,
+button[data-testid="stNumberInputStepDown"]:hover {
+    background: #f7eaea !important;
 }
 
 .stNumberInput,
@@ -185,6 +213,13 @@ div[data-testid="stFormSubmitButton"] > button {
 div[data-testid="stFormSubmitButton"] > button:hover {
     background: var(--maroon-dark);
     color: #ffffff;
+}
+
+/* Keep text visible inside tabs/info/metrics in light background */
+div[data-testid="stTabs"] *,
+div[data-testid="stMetric"] *,
+div[data-testid="stAlertContentInfo"] * {
+    color: var(--text-main) !important;
 }
 
 .prediction-card {
