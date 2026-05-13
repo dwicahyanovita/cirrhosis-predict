@@ -106,6 +106,14 @@ label, .stMarkdown, .stCaptionContainer {
     color: var(--text-main);
 }
 
+div[data-testid="stWidgetLabel"] p,
+div[data-testid="stWidgetLabel"] label,
+div[data-testid="stWidgetLabel"] span {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+    font-weight: 600;
+}
+
 div[data-baseweb="input"] > div,
 div[data-baseweb="select"] > div {
     min-height: 38px;
@@ -115,10 +123,19 @@ div[data-baseweb="select"] > div {
 
 div[data-baseweb="input"] input {
     font-size: 0.95rem;
+    color: var(--text-main) !important;
+    -webkit-text-fill-color: var(--text-main) !important;
+}
+
+div[data-baseweb="input"] input::placeholder {
+    color: #8a6a6a !important;
+    opacity: 1 !important;
 }
 
 div[data-baseweb="select"] span {
     font-size: 0.95rem;
+    color: var(--text-main) !important;
+    opacity: 1 !important;
 }
 
 .stNumberInput,
@@ -146,6 +163,28 @@ div[data-baseweb="select"] span {
     background: var(--maroon-dark);
     color: #ffffff;
     border: 0;
+}
+
+div[data-testid="stFormSubmitButton"] {
+    display: flex;
+    justify-content: flex-start;
+}
+
+div[data-testid="stFormSubmitButton"] > button {
+    min-width: 190px;
+    min-height: 42px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--maroon);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.6rem 1.25rem;
+    box-shadow: 0 8px 18px rgba(127, 29, 29, 0.18);
+}
+
+div[data-testid="stFormSubmitButton"] > button:hover {
+    background: var(--maroon-dark);
+    color: #ffffff;
 }
 
 .prediction-card {
