@@ -1,0 +1,209 @@
+:root {
+    --maroon: #7f1d1d;
+    --maroon-dark: #5f1515;
+    --maroon-soft: #fdf2f2;
+    --border-soft: #ead1d1;
+    --text-main: #261515;
+    --text-muted: #6b4a4a;
+}
+
+.stApp {
+    background: #fffafa;
+    color: var(--text-main);
+}
+
+header[data-testid="stHeader"] {
+    background: #ffffff;
+}
+
+div[data-testid="stDecoration"] {
+    display: none;
+}
+
+.block-container {
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+}
+
+.block-container > div:not(:first-child) {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h2, h3 {
+    color: var(--maroon);
+    letter-spacing: 0;
+}
+
+.app-navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 88px;
+    margin: 0 0 1.5rem 0;
+    padding: 0.2rem 11.5rem;
+    background: var(--maroon);
+    border: 1px solid var(--maroon-dark);
+    border-radius: 0;
+    box-shadow: 0 14px 30px rgba(127, 29, 29, 0.22);
+}
+
+.app-navbar img {
+    position: absolute;
+    left: 2rem;
+    top: 50%;
+    width: 132px;
+    height: auto;
+    transform: translateY(-50%);
+}
+
+.app-title {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.18;
+    text-align: center;
+    margin: 0;
+}
+
+@media (max-width: 760px) {
+    .app-navbar {
+        min-height: 78px;
+        padding: 0.2rem 1.25rem 0.2rem 7.25rem;
+    }
+
+    .app-navbar img {
+        left: 1rem;
+        width: 104px;
+    }
+
+    .app-title {
+        font-size: 1.65rem;
+        text-align: left;
+    }
+}
+
+div[data-testid="stForm"],
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    border-color: var(--border-soft);
+}
+
+div[data-testid="stForm"] {
+    background: #ffffff;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 1rem 1rem 0.75rem 1rem;
+    box-shadow: 0 14px 28px rgba(127, 29, 29, 0.14);
+    margin-bottom: 1rem;
+}
+
+label, .stMarkdown, .stCaptionContainer {
+    color: var(--text-main);
+}
+
+div[data-baseweb="input"] > div,
+div[data-baseweb="select"] > div {
+    min-height: 38px;
+    border-color: var(--border-soft);
+    background: #ffffff;
+}
+
+div[data-baseweb="input"] input {
+    font-size: 0.95rem;
+}
+
+div[data-baseweb="select"] span {
+    font-size: 0.95rem;
+}
+
+.stNumberInput,
+.stSelectbox {
+    margin-bottom: 0.35rem;
+}
+
+.stButton {
+    display: flex;
+    justify-content: center;
+}
+
+.stButton > button {
+    min-width: 190px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--maroon);
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.6rem 1.4rem;
+    box-shadow: 0 8px 18px rgba(127, 29, 29, 0.18);
+}
+
+.stButton > button:hover {
+    background: var(--maroon-dark);
+    color: #ffffff;
+    border: 0;
+}
+
+.prediction-card {
+    margin: 1.25rem auto 1.2rem;
+    max-width: 720px;
+    border: 1px solid var(--border-soft);
+    border-left: 7px solid var(--maroon);
+    border-radius: 8px;
+    background: #ffffff;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 10px 24px rgba(127, 29, 29, 0.08);
+}
+
+.prediction-label {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.prediction-value {
+    color: var(--maroon-dark);
+    font-size: 1.55rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+div[data-testid="stMetric"] {
+    max-width: 720px;
+    margin: 0 auto 1rem;
+    background: var(--maroon-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+}
+
+div[data-testid="stTabs"] button {
+    color: var(--maroon-dark);
+}
+
+div[data-testid="stDataFrame"] {
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.app-footer {
+    max-width: 1120px;
+    margin: 2.5rem auto 0;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.app-footer strong {
+    color: var(--maroon-dark);
+    font-weight: 800;
+}
