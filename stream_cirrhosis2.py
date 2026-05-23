@@ -11,11 +11,9 @@ st.set_page_config(
     layout='wide',
 )
 
-with open('random_forest_model.sav', 'rb') as model_file:
-    cirrhosis_model = pickle.load(model_file)
-
-with open('standard_scaler.sav', 'rb') as scaler_file:
-    standard_scaler = pickle.load(scaler_file)
+with open('best_model_skenario_2_artifacts.sav', 'rb') as model_file:
+    model_artifacts = pickle.load(model_file)
+    cirrhosis_model = model_artifacts['model']
 
 FEATURE_COLUMNS = [
     'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper', 'Alk_Phos',
@@ -33,8 +31,16 @@ NUMERIC_COLUMNS = [
 OHE_COLUMNS = [column for column in FEATURE_COLUMNS if column not in NUMERIC_COLUMNS]
 
 CLASS_LABELS = {
-    0: 'Meninggal dunia',
-    1: 'Bertahan hidup',
+    0: 'Death',
+    1: 'Censored',
+    'D': 'Death',
+    'C': 'Censored',
+    'CL': 'Censored',
+}
+
+CLASS_DISPLAY_ORDER = {
+    'Censored': 0,
+    'Death': 1,
 }
 
 SEX_LABELS = {
@@ -48,9 +54,9 @@ YES_NO_LABELS = {
 }
 
 EDEMA_LABELS = {
-    'N': 'Tidak ada edema dan tidak ada terapi diuretik (N)',
-    'S': 'Edema tanpa diuretik atau membaik dengan diuretik (S)',
-    'Y': 'Edema tetap ada meskipun dengan terapi diuretik (Y)',
+    'N': 'N (no edema and no diuretic therapy for edema)',
+    'S': 'S (edema present without diuretics, or edema resolved by diuretics)',
+    'Y': 'Y (edema despite diuretic therapy)',
 }
 
 LOGO_PATH = 'logo_presisi.png'
@@ -103,14 +109,8 @@ def create_input_data(
     }], columns=FEATURE_COLUMNS)
 
 
-def scale_input_data(input_data):
-    scaled_data = input_data.copy()
-    scaled_data[NUMERIC_COLUMNS] = standard_scaler.transform(scaled_data[NUMERIC_COLUMNS])
-    return scaled_data
-
-
 def class_label(class_value):
-    return CLASS_LABELS.get(int(class_value), str(class_value))
+    return CLASS_LABELS.get(class_value, CLASS_LABELS.get(str(class_value), str(class_value)))
 
 
 def build_readable_input(
@@ -133,32 +133,58 @@ def build_readable_input(
     })
 
 
-def build_scaler_table(raw_input_data, scaled_input_data):
-    return pd.DataFrame({
-        'Kolom Numerik': NUMERIC_COLUMNS,
-        'Nilai Asli': raw_input_data[NUMERIC_COLUMNS].iloc[0].values,
-        'Hasil StandardScaler': scaled_input_data[NUMERIC_COLUMNS].iloc[0].values,
-    })
-
-
 def build_ohe_table(raw_input_data):
     return pd.DataFrame({
-        'Kolom One-Hot Encoding': OHE_COLUMNS,
-        'Nilai': raw_input_data[OHE_COLUMNS].iloc[0].values,
+        'One-Hot Encoding Column': OHE_COLUMNS,
+        'Value': raw_input_data[OHE_COLUMNS].iloc[0].values,
     })
 
 
-def build_probability_table(model, scaled_input_data):
+def find_pipeline_step(estimator, class_name):
+    if estimator.__class__.__name__ == class_name:
+        return estimator
+
+    for _, step in getattr(estimator, 'steps', []):
+        found_step = find_pipeline_step(step, class_name)
+        if found_step is not None:
+            return found_step
+
+    for transformer in getattr(estimator, 'transformers_', []):
+        if len(transformer) >= 2:
+            found_step = find_pipeline_step(transformer[1], class_name)
+            if found_step is not None:
+                return found_step
+
+    return None
+
+
+def build_standard_scaler_table(model, raw_input_data):
+    standard_scaler = find_pipeline_step(model, 'StandardScaler')
+    if standard_scaler is None:
+        return None
+
+    scaler_columns = list(getattr(standard_scaler, 'feature_names_in_', raw_input_data.columns))
+    scaler_input = raw_input_data[scaler_columns]
+    scaled_values = standard_scaler.transform(scaler_input)
+    scaled_by_column = pd.DataFrame(scaled_values, columns=scaler_columns)
+
+    scaled_input_data = raw_input_data.copy()
+    scaled_input_data[NUMERIC_COLUMNS] = scaled_by_column[NUMERIC_COLUMNS].values
+
+    return scaled_input_data
+
+
+def build_probability_table(model, raw_input_data):
     if not hasattr(model, 'predict_proba'):
         return None
 
-    probabilities = model.predict_proba(scaled_input_data)[0]
+    probabilities = model.predict_proba(raw_input_data)[0]
     classes = getattr(model, 'classes_', range(len(probabilities)))
 
     return pd.DataFrame({
-        'Kelas': [class_label(value) for value in classes],
-        'Probabilitas': probabilities,
-        'Probabilitas (%)': probabilities * 100,
+        'Class': [class_label(value) for value in classes],
+        'Probability': probabilities,
+        'Probability (%)': probabilities * 100,
     })
 
 
@@ -168,7 +194,7 @@ def show_prediction_result(prediction, probability_table):
     st.markdown(
         f"""
         <div class="prediction-card">
-            <div class="prediction-label">Hasil Prediksi</div>
+            <div class="prediction-label">Prediction Result</div>
             <div class="prediction-value">{result_label}</div>
         </div>
         """,
@@ -176,74 +202,95 @@ def show_prediction_result(prediction, probability_table):
     )
 
     if probability_table is not None:
-        selected = probability_table[probability_table['Kelas'] == result_label]
-        if not selected.empty:
-            confidence = selected.iloc[0]['Probabilitas (%)']
-            st.metric('Keyakinan model untuk hasil ini', f'{confidence:.2f}%')
-
-
-def show_prediction_details(
-    readable_input, raw_input_data, scaled_input_data, probability_table,
-):
-    st.subheader('Detail Transparansi Prediksi')
-    st.caption(
-        'Bagian ini menunjukkan bagaimana input asli dari user diproses sebelum masuk ke model: '
-        'data kategori diubah dengan One-Hot Encoding, lalu kolom numerik diubah dengan StandardScaler.'
-    )
-
-    tab_summary, tab_scaler, tab_ohe, tab_model = st.tabs([
-        'Ringkasan Input',
-        'StandardScaler',
-        'One-Hot Encoding',
-        'Info Model',
-    ])
-
-    with tab_summary:
-        st.markdown('**Input asli dari user**')
-        st.dataframe(readable_input, use_container_width=True, hide_index=True)
-
-    with tab_scaler:
-        st.markdown('**Kolom numerik sebelum dan sesudah StandardScaler**')
-        st.dataframe(
-            build_scaler_table(raw_input_data, scaled_input_data).style.format({
-                'Nilai Asli': '{:.4f}',
-                'Hasil StandardScaler': '{:.4f}',
-            }),
-            use_container_width=True,
-            hide_index=True,
+        probability_items = []
+        ordered_probability_table = probability_table.sort_values(
+            by='Probability (%)',
+            ascending=False,
         )
-        st.info(
-            'StandardScaler memakai nilai rata-rata dan standar deviasi dari data training. '
-            'Karena itu user tetap mengisi data asli, tetapi model menerima data numerik yang sudah diskalakan.'
-        )
-
-    with tab_ohe:
-        st.markdown('**Hasil One-Hot Encoding untuk data kategori**')
-        st.dataframe(
-            build_ohe_table(raw_input_data),
-            use_container_width=True,
-            hide_index=True,
-        )
-        st.info('Nilai 1 berarti kategori tersebut dipilih, sedangkan 0 berarti tidak dipilih.')
-
-    with tab_model:
-        st.markdown('**Data final yang masuk ke model**')
-        st.dataframe(
-            scaled_input_data.style.format('{:.4f}'),
-            use_container_width=True,
-            hide_index=True,
-        )
-
-        if probability_table is not None:
-            st.markdown('**Probabilitas prediksi per kelas**')
-            st.dataframe(
-                probability_table.style.format({
-                    'Probabilitas': '{:.4f}',
-                    'Probabilitas (%)': '{:.2f}',
-                }),
-                use_container_width=True,
-                hide_index=True,
+        for _, row in ordered_probability_table.iterrows():
+            probability_items.append(
+                f'<span class="probability-item">'
+                f'<strong>{row["Probability (%)"]:.0f}%</strong> {row["Class"]}'
+                f'</span>'
             )
+        st.markdown(
+            f"""
+            <div class="probability-card">
+                <div class="prediction-label">Prediction Probability</div>
+                <div class="probability-list">{''.join(probability_items)}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+# def show_prediction_details(
+#     readable_input, raw_input_data, scaler_table, probability_table,
+# ):
+#     st.subheader('Prediction Transparency Details')
+#     st.caption(
+#         'This section shows how the original user input is processed before entering the model: '
+#         'categorical data is converted with One-Hot Encoding, while StandardScaler and oversampling '
+#         'are already included inside the model pipeline.'
+#     )
+
+#     tab_summary, tab_scaler, tab_ohe, tab_model = st.tabs([
+#         'Input Summary',
+#         'StandardScaler',
+#         'One-Hot Encoding',
+#         'Model Info',
+#     ])
+
+#     with tab_summary:
+#         st.markdown('**Original user input**')
+#         st.dataframe(readable_input, use_container_width=True, hide_index=True)
+
+#     with tab_scaler:
+#         st.markdown('**StandardScaler result from the model pipeline**')
+#         if scaler_table is None:
+#             st.info('StandardScaler was not found inside the loaded model pipeline.')
+#         else:
+#             st.dataframe(
+#                 scaler_table.style.format('{:.4f}'),
+#                 use_container_width=True,
+#                 hide_index=True,
+#             )
+#             st.info(
+#                 'Only numeric columns are scaled. One-Hot Encoding columns remain 0 or 1. '
+#                 'Prediction still uses the full pipeline directly.'
+#             )
+
+#     with tab_ohe:
+#         st.markdown('**One-Hot Encoding result for categorical data**')
+#         st.dataframe(
+#             build_ohe_table(raw_input_data),
+#             use_container_width=True,
+#             hide_index=True,
+#         )
+#         st.info('Value 1 means the category is selected, while 0 means it is not selected.')
+
+#     with tab_model:
+#         st.markdown('**Final data entered into the model**')
+#         st.dataframe(
+#             raw_input_data.style.format('{:.4f}'),
+#             use_container_width=True,
+#             hide_index=True,
+#         )
+#         st.info(
+#             'This model uses a pipeline, so StandardScaler and oversampling '
+#             'are applied internally by the model.'
+#         )
+
+#         if probability_table is not None:
+#             st.markdown('**Prediction probability per class**')
+#             st.dataframe(
+#                 probability_table.style.format({
+#                     'Probability': '{:.4f}',
+#                     'Probability (%)': '{:.2f}',
+#                 }),
+#                 use_container_width=True,
+#                 hide_index=True,
+#             )
 
 
 logo_base64 = image_to_base64(LOGO_PATH)
@@ -265,7 +312,7 @@ with form_area:
 
         with col1:
             age = st.number_input('Age (days)', min_value=0, value=0, step=1)
-            cholesterol = st.number_input('Kolesterol (mg/dl)', min_value=0.0, value=0.0, step=1.0)
+            cholesterol = st.number_input('Cholesterol (mg/dl)', min_value=0.0, value=0.0, step=1.0)
             copper = st.number_input('Copper (ug/day)', min_value=0.0, value=0.0, step=1.0)
             sgot = st.number_input('SGOT (U/ml)', min_value=0.0, value=0.0, step=1.0)
             platelets = st.number_input('Platelets (ml/1000)', min_value=0.0, value=0.0, step=1.0)
@@ -277,15 +324,15 @@ with form_area:
         with col2:
             bilirubin = st.number_input('Bilirubin (mg/dl)', min_value=0.0, value=0.0, step=0.1)
             albumin = st.number_input('Albumin (gm/dl)', min_value=0.0, value=0.0, step=0.1)
-            alk_phos = st.number_input('Alkaline Phosphatase (U/liter)', min_value=0.0, value=0.0, step=1.0)
-            tryglicerides = st.number_input('Tryglicerides', min_value=0.0, value=0.0, step=1.0)
+            alk_phos = st.number_input('Alk_Phos (U/liter)', min_value=0.0, value=0.0, step=1.0)
+            tryglicerides = st.number_input('Tryglicerides (mg/dl)', min_value=0.0, value=0.0, step=1.0)
             prothrombin = st.number_input('Prothrombin (s)', min_value=0.0, value=0.0, step=0.1)
             drug = st.selectbox('Drug', ['D-penicillamine', 'Placebo'])
             ascites = st.selectbox('Ascites', list(YES_NO_LABELS), format_func=YES_NO_LABELS.get)
             spiders = st.selectbox('Spiders', list(YES_NO_LABELS), format_func=YES_NO_LABELS.get)
 
         st.markdown('')
-        predict_button = st.form_submit_button('Prediksi', use_container_width=False)
+        predict_button = st.form_submit_button('Predict', use_container_width=False)
 
 if predict_button:
     raw_input_data = create_input_data(
@@ -293,9 +340,9 @@ if predict_button:
         tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
         hepatomegaly, spiders, edema,
     )
-    scaled_input_data = scale_input_data(raw_input_data)
-    prediction = cirrhosis_model.predict(scaled_input_data)[0]
-    probability_table = build_probability_table(cirrhosis_model, scaled_input_data)
+    prediction = cirrhosis_model.predict(raw_input_data)[0]
+    probability_table = build_probability_table(cirrhosis_model, raw_input_data)
+    scaler_table = build_standard_scaler_table(cirrhosis_model, raw_input_data)
     readable_input = build_readable_input(
         age, bilirubin, cholesterol, albumin, copper, alk_phos, sgot,
         tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
@@ -305,12 +352,12 @@ if predict_button:
     _, result_area, _ = st.columns([0.8, 4.4, 0.8])
     with result_area:
         show_prediction_result(prediction, probability_table)
-        show_prediction_details(
-            readable_input,
-            raw_input_data,
-            scaled_input_data,
-            probability_table,
-        )
+        # show_prediction_details(
+        #     readable_input,
+        #     raw_input_data,
+        #     scaler_table,
+        #     probability_table,
+        # )
 
 st.markdown(
     """

@@ -1,14 +1,15 @@
 :root {
-    --maroon: #7f1d1d;
-    --maroon-dark: #5f1515;
-    --maroon-soft: #fdf2f2;
-    --border-soft: #ead1d1;
-    --text-main: #261515;
-    --text-muted: #6b4a4a;
+    --maroon: #be5f7a;
+    --maroon-dark: #7f3f55;
+    --maroon-soft: #fff1f5;
+    --border-soft: #f0c9d4;
+    --text-main: #321923;
+    --text-muted: #7a5662;
+    --accent-warm: #e08aa4;
 }
 
 .stApp {
-    background: #fffafa;
+    background: linear-gradient(180deg, #fff8fb 0%, #fff1f5 48%, #fffaf7 100%);
     color: var(--text-main);
 }
 
@@ -32,7 +33,7 @@ div[data-testid="stDecoration"] {
 
 div[data-testid="stToolbar"],
 #MainMenu,
-footer {
+footer:not(.app-footer) {
     display: none !important;
 }
 
@@ -75,10 +76,10 @@ h2, h3 {
     width: 100vw;
     margin: 0 0 1.5rem 0;
     padding: 0.2rem 11.5rem;
-    background: #7f1d1d;
-    border: 1px solid #6b1414;
+    background: linear-gradient(135deg, #be5f7a 0%, #9f5f86 100%);
+    border: 1px solid #d8a0b2;
     border-radius: 0;
-    box-shadow: 0 14px 30px rgba(95, 21, 21, 0.24);
+    box-shadow: 0 14px 30px rgba(190, 95, 122, 0.22);
 }
 
 .app-navbar img {
@@ -127,7 +128,7 @@ div[data-testid="stForm"] {
     border: 1px solid var(--border-soft);
     border-radius: 10px;
     padding: 1rem 1rem 0.75rem 1rem;
-    box-shadow: 0 14px 28px rgba(127, 29, 29, 0.14);
+    box-shadow: 0 14px 28px rgba(190, 95, 122, 0.12);
     margin-bottom: 1rem;
 }
 
@@ -157,7 +158,7 @@ div[data-baseweb="input"] input {
 }
 
 div[data-baseweb="input"] input::placeholder {
-    color: #8a6a6a !important;
+    color: #9b7280 !important;
     opacity: 1 !important;
 }
 
@@ -182,7 +183,7 @@ button[data-testid="stNumberInputStepDown"] {
 
 button[data-testid="stNumberInputStepUp"]:hover,
 button[data-testid="stNumberInputStepDown"]:hover {
-    background: #f7eaea !important;
+    background: #fde7ef !important;
 }
 
 .stNumberInput,
@@ -203,7 +204,7 @@ button[data-testid="stNumberInputStepDown"]:hover {
     color: #ffffff !important;
     font-weight: 700;
     padding: 0.6rem 1.4rem;
-    box-shadow: 0 8px 18px rgba(127, 29, 29, 0.18);
+    box-shadow: 0 8px 18px rgba(190, 95, 122, 0.2);
 }
 
 .stButton > button:hover {
@@ -222,11 +223,11 @@ div[data-testid="stFormSubmitButton"] > button {
     min-height: 42px;
     border: 0;
     border-radius: 10px;
-    background: var(--maroon);
+    background: linear-gradient(135deg, #be5f7a 0%, #9f5f86 100%);
     color: #ffffff !important;
     font-weight: 700;
     padding: 0.6rem 1.25rem;
-    box-shadow: 0 8px 18px rgba(127, 29, 29, 0.18);
+    box-shadow: none;
 }
 
 div[data-testid="stFormSubmitButton"] > button,
@@ -238,7 +239,7 @@ div[data-testid="stFormSubmitButton"] > button *,
 }
 
 div[data-testid="stFormSubmitButton"] > button:hover {
-    background: var(--maroon-dark);
+    background: linear-gradient(135deg, #9f5f86 0%, #7f3f55 100%);
     color: #ffffff !important;
 }
 
@@ -253,11 +254,11 @@ div[data-testid="stAlertContentInfo"] * {
     margin: 1.25rem auto 1.2rem;
     max-width: 720px;
     border: 1px solid var(--border-soft);
-    border-left: 7px solid var(--maroon);
+    border-left: 7px solid var(--accent-warm);
     border-radius: 8px;
     background: #ffffff;
     padding: 1.1rem 1.25rem;
-    box-shadow: 0 10px 24px rgba(127, 29, 29, 0.08);
+    box-shadow: 0 10px 24px rgba(190, 95, 122, 0.1);
 }
 
 .prediction-label {
@@ -272,6 +273,37 @@ div[data-testid="stAlertContentInfo"] * {
     font-size: 1.55rem;
     font-weight: 800;
     line-height: 1.25;
+}
+
+.probability-card {
+    margin: 0 auto 1rem;
+    max-width: 720px;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    background: var(--maroon-soft);
+    padding: 0.95rem 1.25rem 1.05rem;
+}
+
+.probability-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.45rem;
+}
+
+.probability-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    color: var(--maroon-dark) !important;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.probability-item strong {
+    color: var(--maroon-dark) !important;
+    font-size: 1.7rem;
+    font-weight: 900;
 }
 
 div[data-testid="stMetric"] {
