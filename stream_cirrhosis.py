@@ -1,44 +1,8 @@
 import base64
-import importlib
 import pickle
-import warnings
-from collections import UserList
 
 import pandas as pd
 import streamlit as st
-
-column_transformer = importlib.import_module('sklearn.compose._column_transformer')
-
-
-if not hasattr(column_transformer, '_RemainderColsList'):
-    class _RemainderColsList(UserList):
-        def __init__(
-            self,
-            columns,
-            *,
-            future_dtype=None,
-            warning_was_emitted=False,
-            warning_enabled=True,
-        ):
-            super().__init__(columns)
-            self.future_dtype = future_dtype
-            self.warning_was_emitted = warning_was_emitted
-            self.warning_enabled = warning_enabled
-
-        def __getitem__(self, index):
-            self._show_remainder_cols_warning()
-            return super().__getitem__(index)
-
-        def _show_remainder_cols_warning(self):
-            if self.warning_was_emitted or not self.warning_enabled:
-                return
-            self.warning_was_emitted = True
-            warnings.warn(
-                'The loaded model was trained with a newer scikit-learn ColumnTransformer format.',
-                category=FutureWarning,
-            )
-
-    column_transformer._RemainderColsList = _RemainderColsList
 
 
 st.set_page_config(
@@ -47,10 +11,12 @@ st.set_page_config(
     layout='wide',
 )
 
+# Load model pipeline terbaik dari artifact skenario 3.
 with open('best_model_skenario_3_artifacts.sav', 'rb') as model_file:
     model_artifacts = pickle.load(model_file)
     cirrhosis_model = model_artifacts['model']
 
+# Daftar fitur harus sama dengan kolom yang digunakan saat training model.
 FEATURE_COLUMNS = [
     'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper', 'Alk_Phos',
     'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin', 'Stage',
@@ -64,8 +30,10 @@ NUMERIC_COLUMNS = [
     'SGOT', 'Tryglicerides', 'Platelets', 'Prothrombin', 'Stage',
 ]
 
+# Kolom kategori sudah diubah menjadi one-hot encoding.
 OHE_COLUMNS = [column for column in FEATURE_COLUMNS if column not in NUMERIC_COLUMNS]
 
+# Mapping output model agar hasil prediksi lebih mudah dibaca.
 CLASS_LABELS = {
     0: 'Death',
     1: 'Censored',
@@ -92,10 +60,12 @@ STYLE_PATH = 'styles.css'
 
 
 def image_to_base64(path):
+    # Mengubah logo menjadi base64 agar bisa ditampilkan dalam HTML Streamlit.
     with open(path, 'rb') as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 def load_css(path):
+    # Memuat file CSS eksternal untuk styling tampilan aplikasi.
     with open(path, 'r') as style_file:
         css = style_file.read()
     st.markdown(f'<style>{css}</style>', unsafe_allow_html=True)
@@ -109,6 +79,7 @@ def create_input_data(
     tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
     hepatomegaly, spiders, edema,
 ):
+    # Mengubah input user menjadi DataFrame dengan urutan kolom sesuai model.
     return pd.DataFrame([{
         'Age': float(age),
         'Bilirubin': float(bilirubin),
@@ -138,6 +109,7 @@ def create_input_data(
 
 
 def class_label(class_value):
+    # Mengubah nilai class dari model menjadi label yang ditampilkan di UI.
     return CLASS_LABELS.get(class_value, CLASS_LABELS.get(str(class_value), str(class_value)))
 
 
@@ -146,6 +118,7 @@ def build_readable_input(
     tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
     hepatomegaly, spiders, edema,
 ):
+    # Membuat ringkasan input user dalam format yang mudah dibaca.
     return pd.DataFrame({
         'Variable': [
             'Age', 'Bilirubin', 'Cholesterol', 'Albumin', 'Copper', 'Alk_Phos',
@@ -162,13 +135,27 @@ def build_readable_input(
 
 
 def build_ohe_table(raw_input_data):
+    # Menampilkan nilai hasil one-hot encoding untuk fitur kategori.
     return pd.DataFrame({
         'One-Hot Encoding Column': OHE_COLUMNS,
         'Value': raw_input_data[OHE_COLUMNS].iloc[0].values,
     })
 
 
+def build_number_column_config(columns, width='medium', number_format='%.2f'):
+    # Mengatur lebar dan format kolom angka pada tabel Streamlit.
+    return {
+        column: st.column_config.NumberColumn(
+            column,
+            width=width,
+            format=number_format,
+        )
+        for column in columns
+    }
+
+
 def find_pipeline_step(estimator, class_name):
+    # Mencari step tertentu di dalam pipeline model.
     if estimator.__class__.__name__ == class_name:
         return estimator
 
@@ -187,6 +174,7 @@ def find_pipeline_step(estimator, class_name):
 
 
 def build_standard_scaler_table(model, raw_input_data):
+    # Membuat tabel hasil StandardScaler dari pipeline untuk kebutuhan transparansi.
     standard_scaler = find_pipeline_step(model, 'StandardScaler')
     if standard_scaler is None:
         return None
@@ -203,6 +191,7 @@ def build_standard_scaler_table(model, raw_input_data):
 
 
 def build_probability_table(model, raw_input_data):
+    # Mengambil probabilitas prediksi untuk setiap class jika model mendukung predict_proba.
     if not hasattr(model, 'predict_proba'):
         return None
 
@@ -217,6 +206,7 @@ def build_probability_table(model, raw_input_data):
 
 
 def show_prediction_result(prediction, probability_table):
+    # Menampilkan hasil prediksi utama dan probabilitas class.
     result_label = class_label(prediction)
 
     st.markdown(
@@ -300,7 +290,8 @@ def show_prediction_result(prediction, probability_table):
 #     with tab_model:
 #         st.markdown('**Final data entered into the model**')
 #         st.dataframe(
-#             raw_input_data.style.format('{:.4f}'),
+#             raw_input_data,
+#             column_config=build_number_column_config(raw_input_data.columns, width='medium'),
 #             use_container_width=True,
 #             hide_index=True,
 #         )
@@ -322,11 +313,12 @@ def show_prediction_result(prediction, probability_table):
 
 
 logo_base64 = image_to_base64(LOGO_PATH)
+# Header aplikasi berisi logo dan judul.
 st.markdown(
     f"""
     <div class="app-navbar">
         <img src="data:image/png;base64,{logo_base64}" alt="Logo PreSisi">
-        <h1 class="app-title">PreSisi: Prediksi Survival Pasien Sirosis Hati</h1>
+        <h2 class="app-title">PreSisi: Prediksi Survival Pasien Sirosis Hati</h2>
     </div>
     """,
     unsafe_allow_html=True,
@@ -336,6 +328,7 @@ _, form_area, _ = st.columns([0.8, 4.4, 0.8])
 
 with form_area:
     with st.form('predict_form'):
+        # Form input fitur pasien sesuai variabel dataset.
         col1, col2 = st.columns(2, gap='medium')
 
         with col1:
@@ -363,6 +356,7 @@ with form_area:
         predict_button = st.form_submit_button('Predict', use_container_width=False)
 
 if predict_button:
+    # Membuat data input, menjalankan prediksi, lalu menampilkan hasilnya.
     raw_input_data = create_input_data(
         age, bilirubin, cholesterol, albumin, copper, alk_phos, sgot,
         tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
@@ -388,6 +382,7 @@ if predict_button:
         # )
 
 st.markdown(
+    # Footer custom aplikasi.
     """
     <footer class="app-footer">
         &copy; 2026 <strong>PreSisi</strong> by dwicahyanovita
