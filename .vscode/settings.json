@@ -1,0 +1,6 @@
+{
+    "python.defaultInterpreterPath": "/Users/dwicahyanovita/.pyenv/versions/3.12.0/bin/python",
+    "python.analysis.extraPaths": [
+        "/Users/dwicahyanovita/.pyenv/versions/3.12.0/lib/python3.12/site-packages"
+    ]
+}

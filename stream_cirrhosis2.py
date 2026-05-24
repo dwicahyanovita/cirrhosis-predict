@@ -1,11 +1,13 @@
 import base64
+import importlib
 import pickle
 import warnings
 from collections import UserList
 
 import pandas as pd
-import sklearn.compose._column_transformer as column_transformer
 import streamlit as st
+
+column_transformer = importlib.import_module('sklearn.compose._column_transformer')
 
 
 if not hasattr(column_transformer, '_RemainderColsList'):
