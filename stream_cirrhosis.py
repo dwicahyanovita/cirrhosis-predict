@@ -318,7 +318,7 @@ st.markdown(
     f"""
     <div class="app-navbar">
         <img src="data:image/png;base64,{logo_base64}" alt="Logo PreSisi">
-        <h2 class="app-title">PreSisi: Prediksi Survival Pasien Sirosis Hati</h2>
+        <h3 class="app-title">PreSisi: Prediksi Survival Pasien Sirosis Hati</h3>
     </div>
     """,
     unsafe_allow_html=True,
