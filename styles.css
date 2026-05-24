@@ -71,9 +71,7 @@ h2, h3 {
     margin: 0.5rem auto 1.5rem;
     padding: 0.2rem 8.5rem;
     overflow: hidden;
-    background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.16)),
-        linear-gradient(135deg, rgba(143, 29, 44, 0.94), rgba(217, 79, 114, 0.78));
+    background: linear-gradient(135deg, #8f1d2c 0%, #d94f72 100%);
     border: 1px solid rgba(255, 255, 255, 0.62);
     border-radius: 50px;
     box-shadow: 0 16px 34px rgba(143, 29, 44, 0.2);
