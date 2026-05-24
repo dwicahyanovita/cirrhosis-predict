@@ -23,27 +23,17 @@
     color: var(--text-main);
 }
 
-header[data-testid="stHeader"] {
-    display: none !important;
-}
-
 div[data-testid="stDecoration"] {
     display: none;
 }
 
-div[data-testid="stToolbar"],
 #MainMenu,
 footer:not(.app-footer) {
     display: none !important;
 }
 
-/* Hide remaining Streamlit floating/status widgets and branding badges. */
-div[data-testid="stStatusWidget"],
-div[data-testid="stAppViewToolbar"],
-div[data-testid="stSidebarNav"],
-a[href*="streamlit.io"],
-a[title*="Streamlit"],
-a[aria-label*="Streamlit"] {
+/* Hide only the unused sidebar navigation; keep Streamlit run/stop/deploy controls visible. */
+div[data-testid="stSidebarNav"] {
     display: none !important;
     visibility: hidden !important;
 }

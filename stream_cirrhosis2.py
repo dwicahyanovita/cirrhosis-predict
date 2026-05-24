@@ -1,8 +1,42 @@
 import base64
 import pickle
+import warnings
+from collections import UserList
 
 import pandas as pd
+import sklearn.compose._column_transformer as column_transformer
 import streamlit as st
+
+
+if not hasattr(column_transformer, '_RemainderColsList'):
+    class _RemainderColsList(UserList):
+        def __init__(
+            self,
+            columns,
+            *,
+            future_dtype=None,
+            warning_was_emitted=False,
+            warning_enabled=True,
+        ):
+            super().__init__(columns)
+            self.future_dtype = future_dtype
+            self.warning_was_emitted = warning_was_emitted
+            self.warning_enabled = warning_enabled
+
+        def __getitem__(self, index):
+            self._show_remainder_cols_warning()
+            return super().__getitem__(index)
+
+        def _show_remainder_cols_warning(self):
+            if self.warning_was_emitted or not self.warning_enabled:
+                return
+            self.warning_was_emitted = True
+            warnings.warn(
+                'The loaded model was trained with a newer scikit-learn ColumnTransformer format.',
+                category=FutureWarning,
+            )
+
+    column_transformer._RemainderColsList = _RemainderColsList
 
 
 st.set_page_config(
@@ -11,7 +45,7 @@ st.set_page_config(
     layout='wide',
 )
 
-with open('best_model_skenario_2_artifacts.sav', 'rb') as model_file:
+with open('best_model_skenario_3_artifacts.sav', 'rb') as model_file:
     model_artifacts = pickle.load(model_file)
     cirrhosis_model = model_artifacts['model']
 
@@ -33,14 +67,6 @@ OHE_COLUMNS = [column for column in FEATURE_COLUMNS if column not in NUMERIC_COL
 CLASS_LABELS = {
     0: 'Death',
     1: 'Censored',
-    'D': 'Death',
-    'C': 'Censored',
-    'CL': 'Censored',
-}
-
-CLASS_DISPLAY_ORDER = {
-    'Censored': 0,
-    'Death': 1,
 }
 
 SEX_LABELS = {
@@ -342,7 +368,7 @@ if predict_button:
     )
     prediction = cirrhosis_model.predict(raw_input_data)[0]
     probability_table = build_probability_table(cirrhosis_model, raw_input_data)
-    scaler_table = build_standard_scaler_table(cirrhosis_model, raw_input_data)
+    # scaler_table = build_standard_scaler_table(cirrhosis_model, raw_input_data)
     readable_input = build_readable_input(
         age, bilirubin, cholesterol, albumin, copper, alk_phos, sgot,
         tryglicerides, platelets, prothrombin, stage, drug, sex, ascites,
