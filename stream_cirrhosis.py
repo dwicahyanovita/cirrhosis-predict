@@ -16,7 +16,7 @@ MODEL_ARTIFACT_PATH = Path('best_model_cv_artifacts.sav')
 
 
 def load_model_from_artifact():
-    # Memuat model dari artifact CV terbaru.
+    # Memuat model
     if not MODEL_ARTIFACT_PATH.exists():
         raise FileNotFoundError(
             f'Artifact model tidak ditemukan: {MODEL_ARTIFACT_PATH}'
