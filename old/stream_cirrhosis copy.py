@@ -1,6 +1,5 @@
 import base64
 import pickle
-from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -12,34 +11,10 @@ st.set_page_config(
     layout='wide',
 )
 
-MODEL_ARTIFACT_PATH = Path('best_model_cv_artifacts.sav')
-
-
-def load_model_from_artifact():
-    # Memuat model dari artifact CV terbaru.
-    if not MODEL_ARTIFACT_PATH.exists():
-        raise FileNotFoundError(
-            f'Artifact model tidak ditemukan: {MODEL_ARTIFACT_PATH}'
-        )
-
-    with MODEL_ARTIFACT_PATH.open('rb') as model_file:
-        model_artifacts = pickle.load(model_file)
-
-    if isinstance(model_artifacts, dict):
-        if 'model' in model_artifacts:
-            return model_artifacts['model']
-
-        for value in model_artifacts.values():
-            if hasattr(value, 'predict'):
-                return value
-
-    if hasattr(model_artifacts, 'predict'):
-        return model_artifacts
-
-    raise ValueError('Artifact model tidak berisi objek model yang bisa digunakan untuk prediksi.')
-
-
-cirrhosis_model = load_model_from_artifact()
+# Load model pipeline terbaik dari artifact skenario 3.
+with open('best_model_skenario_3_artifacts.sav', 'rb') as model_file:
+    model_artifacts = pickle.load(model_file)
+    cirrhosis_model = model_artifacts['model']
 
 # Daftar fitur harus sama dengan kolom yang digunakan saat training model.
 FEATURE_COLUMNS = [
